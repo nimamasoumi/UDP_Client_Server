@@ -4,6 +4,8 @@ In this app, ServerSocket is used instead of DatagramSocket
 This class implements the singletons design pattern. 
  */
 
+import java.util.List;
+import java.util.ArrayList;
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -33,6 +35,7 @@ class KUKAserver implements Runnable, Closeable
     private ServerSocket serversocket = null;
     private int listenport = 0;
     private static final int sockettimeout = 20;
+    private List<IPacketListener> packetlisteners = new ArrayList<IPacketListener>();
 
     private synchronized boolean listen()
     {
@@ -97,13 +100,28 @@ class KUKAserver implements Runnable, Closeable
     {
         this.listenport = _listenport;
     }
+    public void addListener(IPacketListener _pl)
+    {
+        this.packetlisteners.add(_pl);
+    }
+
+    // send packets to connected clients
+    public synchronized void send(Packet _p)
+    {
+
+    }
     public static void main(String[] args)
     {
         final int port = 30005;
+        var echo_pl = new EchoPacket();
 
+        // initializing the server
         System.out.println("The server is starting ... ");
         final var server = new KUKAserver();
         server.setListenPort(port);
+        server.addListener(echo_pl);
+
+        // running the server thread
         var tserver = new Thread(server);
         tserver.start();
 
