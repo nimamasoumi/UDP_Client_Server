@@ -2,6 +2,7 @@ class Packet
 {
     public Packet(){};
 
+    public PacketType type = PacketType.Unknown;
     private String message;
     public String getMessage()
     {
@@ -14,5 +15,10 @@ class Packet
     public String serialize()
     {
         return this.message;
+    }
+    public static Packet deserialize(String _message)
+    {
+        var packet = new Packet();
+        return packet;
     }
 }
