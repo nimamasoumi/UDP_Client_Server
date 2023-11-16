@@ -1,7 +1,11 @@
 // Echo the received packets back to the client
 package utils;
 
-class EchoPacket implements IPacketListener
+import server.IPacketListener;
+import server.KUKAserver;
+import server.Packet;
+
+public class EchoPacket implements IPacketListener
 {
     private KUKAserver server = KUKAserver.getInstance();
 
