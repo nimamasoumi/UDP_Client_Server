@@ -1,10 +1,13 @@
 package packets;
 
-package packets;
+import server.Packet;
+import server.PacketType;
 
-import utils.Packet;
-
-class MessagePacket extends Packet
+public class MessagePacket extends Packet
 {
-
+    public String message = "";
+    public MessagePacket()
+    {
+        this.type=PacketType.MessagePacket;
+    }
 }

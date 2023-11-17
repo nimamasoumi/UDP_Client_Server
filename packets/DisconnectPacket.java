@@ -1,8 +1,12 @@
 package packets;
 
-import utils.Packet;
+import server.Packet;
+import server.PacketType;
 
-class DisconnectPacket extends Packet
+public class DisconnectPacket extends Packet
 {
-
+    public DisconnectPacket()
+    {
+        this.type=PacketType.DisconnectPacket;
+    }
 }
