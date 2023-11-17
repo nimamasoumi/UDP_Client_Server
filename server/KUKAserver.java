@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.ArrayList;
 import java.io.Closeable;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
@@ -87,9 +89,13 @@ public class KUKAserver implements Runnable, Closeable
     @Override
     public void run()
     {
+        // server starts listening on a port passively
         listen();
+
+        // the server thread keeps running until the server is listening
         while(serversocket!=null && serversocket.isBound())
         {
+            // accepting clients and creating sockets for them
             if (socket == null || !socket.isConnected() || socket.isClosed())
             {
                 try
@@ -101,6 +107,122 @@ public class KUKAserver implements Runnable, Closeable
                     safeSleep(1000);
                     continue;
                 }
+            }
+
+            // creating a stream to read the client data
+            BufferedReader reader = null;
+            System.out.println("Client connected ...");
+            try
+            {
+                reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            }
+            catch (Exception e)
+            {
+                System.out.println("Problem getting client socket stream.\n"+e);
+                safeSleep(1000);
+                continue;
+            }
+
+            // serve the client by reading the client socket stream
+            // continue until the client disconnects
+            while(socket.isConnected() && !socket.isClosed())
+            {
+                // reading the client packet as a String
+                String linepacket;
+                try
+                {
+                    linepacket = reader.readLine();
+                }
+                catch (Exception e)
+                {
+                    if(socket.isConnected())
+                    {
+                        System.out.println("Problems reading client socket.\n"+e);
+                        try
+                        {
+                            socket.close();
+                        }
+                        catch (IOException e2)
+                        {
+                            System.out.println("Problem closing the client socket.\n"+e2);
+                        }
+                    }
+                    break;
+                }
+                if(linepacket==null)
+                {
+                    if(socket.isConnected())
+                    {
+                        System.out.println("Problems reading client socket.\n");
+                        try
+                        {
+                            socket.close();
+                        }
+                        catch (IOException e)
+                        {
+                            System.out.println("Problem closing the client socket.\n"+e);
+                        }
+                    }
+                    break;
+                }
+
+                // converting the string into the packet and handle the data
+                final var recPacket = Packet.deserialize(linepacket);
+                
+                /* the server does not process the packets directly
+                 except for the disconnect packet which requests for shutting down the client
+                 it lets the packet listeners take action!
+                 e.g. EchoPacket prints the entire packet and sends it back to the client */
+                if(recPacket.type==PacketType.DisconnectPacket)
+                {                    
+                    System.out.println("Client request to disconnect.\n");
+                    try
+                    {
+                        socket.close();
+                    }
+                    catch (IOException e)
+                    {
+                        System.out.println("Closing the client socket.\n"+e);
+                    }                        
+                    break;
+                }
+
+                notifyPacketListeners(recPacket);
+            }
+
+            System.out.println("Client disconnected.");
+
+            if(socket!=null)
+            {
+                try
+                {
+                    socket.close();
+                }
+                catch (IOException e)
+                {
+                    System.out.println("Closing the client socket.\n"+e);
+                }
+            }
+        }
+        stop();
+    }
+
+    private void notifyPacketListeners(final Packet _packet)
+    {
+        synchronized(this)
+        {
+            for(final var listener: packetlisteners)
+            {
+                // Handle packets in a separate thread so that we do not
+                // block processing new packets.
+                new Thread(new Runnable() 
+                {
+                    @Override
+                    public void run()
+                    {   
+                        listener.handlePacket(_packet);
+                    }
+                }).start();
             }
         }
     }
