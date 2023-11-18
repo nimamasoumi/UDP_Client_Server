@@ -280,13 +280,14 @@ public class KUKAserver implements Runnable, Closeable
     public synchronized void send(Packet _p)
     {
         if(!isClientConnected() || socket.isClosed())
-        {
+        {  
             System.out.println("No client is connected, dropping packet: "+_p.serialize());
             return;
         }
 
         try
         {
+            System.out.println("Sending a packet to the client.");
             var writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
             writer.write(_p.serialize()+"\n");
             writer.flush();
@@ -313,6 +314,19 @@ public class KUKAserver implements Runnable, Closeable
         tserver.start();
 
         safeSleep(1000);
+
+        // try
+        // {
+        //     tserver.join();
+        // }
+        // catch (Exception e)
+        // {
+        //     System.out.println("Server thread encountered an issue.\n"+e);
+        // }
+
+        boolean exitApp = false;
+        while(!exitApp){};
+        
 
         // Shutting down the server
         server.stop();
