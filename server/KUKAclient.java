@@ -1,41 +1,54 @@
 package server;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
+
+import java.net.Socket;
 import java.net.InetAddress;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.util.Scanner;
 
-class KUKAClient
+import packets.*;
+
+public class KUKAclient
 {
     public static void main(String[] args) throws Exception
-    {
-        /* args[0] is the ip address of the server 
-         * args[1] is the port number of receiver
-        */
-
+    {        
         // Step 1: creating a socker
-        var dsocket = new DatagramSocket();
-        var ip = InetAddress.getByName(args[0]);
-        int port = Integer.parseInt(args[1]);
-        DatagramPacket dpacket;
+        var ip = InetAddress.getByName("127.0.0.1");
+        int port = 30005;
+        var clientsocket = new Socket(ip, port);
+        var reader = new BufferedReader(new InputStreamReader(
+            clientsocket.getInputStream()));
+        var writer = new BufferedWriter(new OutputStreamWriter(
+            clientsocket.getOutputStream()));
+        var packet = new MessagePacket();
         
         boolean exitApp = false;
         var usrIn = new Scanner(System.in);
-        byte[] buf = null;
-        String usrData;
+        String usrData, readline;
 
         // Run the app until the user closes the connection
         while(!exitApp)
-        {
-            // Step 2: convert the user data into bytes
+        {            
             System.out.println("\nPlease enter the data: ");
             usrData = usrIn.nextLine();
-            buf = usrData.getBytes();
+            writer.write(packet.serialize()+"\n");     
+            writer.flush();                
 
-            // Step 3: create the DatagramPacket for sending to the server
-            dpacket = new DatagramPacket(buf, buf.length, ip, port);
+            Thread.sleep(1000);
 
-            // Step 4: send the data
-            dsocket.send(dpacket);
+            try
+            {
+                readline = reader.readLine();
+            }
+            catch(Exception e)
+            {
+                System.out.println("Problem reading server data"+e);
+                continue;
+            }
+
+            System.out.println(readline);
 
             if(usrData.equals("exit"))
             {
@@ -44,8 +57,7 @@ class KUKAClient
         }
 
         // Step 5: close the socket
-        dsocket.close();
-        usrIn.close();
-        
+        clientsocket.close();        
+        usrIn.close();        
     }
 }
