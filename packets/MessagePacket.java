@@ -10,4 +10,9 @@ public class MessagePacket extends Packet
     {
         this.type=PacketType.MessagePacket;
     }
+    public MessagePacket(String _message)
+    {
+        this.type=PacketType.MessagePacket;
+        this.message=_message;
+    }
 }
