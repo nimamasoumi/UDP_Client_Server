@@ -2,7 +2,9 @@ package server;
 
 public enum PacketType
 {
-    Unknown,
+    Unknown,    
+    ChangeStatePacket,
+    DisconnectPacket,
     MessagePacket,
-    DisconnectPacket
+    StateChangePacket
 }
