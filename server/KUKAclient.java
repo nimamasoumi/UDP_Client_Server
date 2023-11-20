@@ -33,6 +33,7 @@ public class KUKAclient
         {            
             System.out.println("\nPlease enter the data: ");
             usrData = usrIn.nextLine();
+            packet = new MessagePacket(usrData);
             writer.write(packet.serialize()+"\n");     
             writer.flush();                
 
@@ -52,6 +53,9 @@ public class KUKAclient
 
             if(usrData.equals("exit"))
             {
+                var _packet = new DisconnectPacket();
+                writer.write(_packet.serialize()+"\n");
+                writer.flush();
                 exitApp = true;
             }
         }
