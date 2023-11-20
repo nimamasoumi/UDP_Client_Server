@@ -6,6 +6,9 @@ This class implements the singletons design pattern.
  */
 
 import java.util.List;
+
+import server.data.KUKAAppStates;
+
 import java.util.ArrayList;
 import java.io.Closeable;
 import java.io.IOException;
@@ -18,6 +21,7 @@ import java.net.ServerSocket;
 import java.net.InetSocketAddress;
 
 import utils.EchoPacket;
+import tasks.*;
 
 public class KUKAserver implements Runnable, Closeable
 {
@@ -40,11 +44,12 @@ public class KUKAserver implements Runnable, Closeable
         return instance;
     }
 
-    private ServerSocket serversocket = null;
-    private Socket socket = null;
-    private int listenport = 0;
+    private static ServerSocket serversocket = null;
+    private static Socket socket = null;
+    private static int listenport = 0;
     private static final int sockettimeout = 20;
-    private List<IPacketListener> packetlisteners = new ArrayList<IPacketListener>();
+    private static List<IPacketListener> packetlisteners = new ArrayList<IPacketListener>();
+    private static KUKAAppStates medAppState = KUKAAppStates.INITIALIZING;
 
     private static void safeSleep(long _s)
     {
@@ -269,11 +274,11 @@ public class KUKAserver implements Runnable, Closeable
 
     public void setListenPort(int _listenport)
     {
-        this.listenport = _listenport;
+        KUKAserver.listenport = _listenport;
     }
     public void addListener(IPacketListener _pl)
     {
-        this.packetlisteners.add(_pl);
+        KUKAserver.packetlisteners.add(_pl);
     }
 
     // send packets to connected clients
@@ -307,13 +312,14 @@ public class KUKAserver implements Runnable, Closeable
         System.out.println("The server is starting ... ");
         final var server = new KUKAserver();
         server.setListenPort(port);
-        server.addListener(echo_pl);
 
         // running the server thread
         var tserver = new Thread(server);
         tserver.start();
 
         safeSleep(1000);
+
+        server.addListener(echo_pl);
 
         // try
         // {
@@ -325,7 +331,38 @@ public class KUKAserver implements Runnable, Closeable
         // }
 
         boolean exitApp = false;
-        while(!exitApp){};
+        while(!exitApp)
+        {
+            // Find the proper task to run
+            // task managers are listeners of KUKAserver as well
+            // Below we are deciding which one to run based on the client's request
+            ITask task = null;
+            switch(medAppState)
+            {
+                case IDLE:
+                    break;
+                case BASIC_MOVE:
+                    break;
+                case ERROR:
+                    break;
+                default:
+                    break;
+            }
+
+            // If we found a task we can run
+            if (task!=null)
+            {
+                // Tasks will return false if they fail to initialize,
+                // We should return to the initialization/idle state if
+                // this happens. 
+                // You can also default to IDLE by returning false if that
+                // is the desired result.
+                if (!task.run())
+                {
+                    medAppState = KUKAAppStates.IDLE;
+                }
+            }
+        };
         
 
         // Shutting down the server
