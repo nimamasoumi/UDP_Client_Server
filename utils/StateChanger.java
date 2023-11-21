@@ -2,8 +2,11 @@ package utils;
 
 import server.IPacketListener;
 import server.Packet;
+import tasks.Task_Idle;
 
 public class StateChanger implements IPacketListener{
+
+    //private Task_Idle taskIdle = Task_Idle.getInstance();
 
     private boolean isCancel = false;
 
@@ -18,7 +21,7 @@ public class StateChanger implements IPacketListener{
         switch(_p.type)
         {
             case ChangeStatePacket:
-                this.isCancel = true;
+                Task_Idle.isCancel = true;
                 break;
             case Unknown:
                 break;
