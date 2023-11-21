@@ -50,6 +50,7 @@ public class KUKAserver implements Runnable, Closeable
     private static final int sockettimeout = 20;
     private static List<IPacketListener> packetlisteners = new ArrayList<IPacketListener>();
     private static KUKAAppStates medAppState = KUKAAppStates.INITIALIZING;
+    private static boolean clientDisconnect = false;
 
     private static void safeSleep(long _s)
     {
@@ -71,6 +72,11 @@ public class KUKAserver implements Runnable, Closeable
     public boolean isClientConnected()
     {
         return isConnected() && socket != null && socket.isConnected();
+    }
+
+    public boolean isClientDisconnected()
+    {
+        return KUKAserver.clientDisconnect;
     }
 
     private synchronized boolean listen()
@@ -117,6 +123,7 @@ public class KUKAserver implements Runnable, Closeable
             // creating a stream to read the client data
             BufferedReader reader = null;
             System.out.println("Client connected ...");
+            KUKAserver.clientDisconnect = false;
             try
             {
                 reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -196,6 +203,7 @@ public class KUKAserver implements Runnable, Closeable
             }
 
             System.out.println("Client disconnected.");
+            KUKAserver.clientDisconnect = true;
 
             if(socket!=null)
             {
@@ -281,6 +289,11 @@ public class KUKAserver implements Runnable, Closeable
         KUKAserver.packetlisteners.add(_pl);
     }
 
+    public void removeListener(IPacketListener _pl)
+    {
+        KUKAserver.packetlisteners.remove(_pl);
+    }
+
     // send packets to connected clients
     public synchronized void send(Packet _p)
     {
@@ -340,6 +353,7 @@ public class KUKAserver implements Runnable, Closeable
             switch(medAppState)
             {
                 case IDLE:
+                    task = Task_Idle.getInstance();
                     break;
                 case BASIC_MOVE:
                     break;
