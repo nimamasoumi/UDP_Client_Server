@@ -351,15 +351,17 @@ public class KUKAserver implements Runnable, Closeable
             // Below we are deciding which one to run based on the client's request
             ITask task = null;
             switch(medAppState)
-            {
-                case IDLE:
-                    task = Task_Idle.getInstance();
-                    break;
+            {                
                 case BASIC_MOVE:
+                    task = Task_Motion.getInstance();
                     break;
                 case ERROR:
+                    task = null;
                     break;
+                // IDLE and default are treated similarily
+                case IDLE:                    
                 default:
+                    task = Task_Idle.getInstance();
                     break;
             }
 
