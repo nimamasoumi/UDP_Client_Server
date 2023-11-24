@@ -24,7 +24,6 @@ public class StateChanger implements IPacketListener{
                 Task_Idle.isCancel = true;
                 break;
             case Unknown:
-                break;
             default:
                 break;
         }
