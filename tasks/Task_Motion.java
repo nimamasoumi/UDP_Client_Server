@@ -2,6 +2,7 @@ package tasks;
 
 import server.KUKAserver;
 import server.data.KUKAAppStates;
+import utils.MotionHandler;
 import packets.StateChangePacket;
 import packets.ErrorPacket;
 import server.IPacketListener;
@@ -26,11 +27,12 @@ public class Task_Motion implements ITask
     }
 
     private KUKAserver medServer = KUKAserver.getInstance();
-    private boolean isCancel = false;
-    private IPacketListener listener = null;
+    public static boolean isCancel = false;
+    private static IPacketListener listener = null;
 
     private void addPacketHandler()
     {
+        Task_Motion.listener = new MotionHandler();
         medServer.addListener(listener);
     }
 
