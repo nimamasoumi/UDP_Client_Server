@@ -7,5 +7,6 @@ public enum PacketType
     DisconnectPacket,
     ErrorPacket,
     MessagePacket,
+    MovePacket,
     StateChangePacket
 }
