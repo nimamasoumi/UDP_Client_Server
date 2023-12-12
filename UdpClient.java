@@ -9,6 +9,8 @@ import java.util.List;
 
 class UdpClient
 {
+    public UdpClient(){}
+
     private static DatagramSocket dsocket = null;
     private int packetCounter = 0;
     private static final String packetIdentifier = "RobotStateProvider";
@@ -23,8 +25,16 @@ class UdpClient
          * args[1] is the port number of receiver
         */
 
+        var udpComm = new UdpClient();
         // Step 1: creating a socket
         dsocket = new DatagramSocket();
+
+        int informer_port = 30008;
+        while(!udpComm.ping(2000, InetAddress.getByName("127.0.0.1"),informer_port))
+        {
+            System.out.println("Pinging failed! Retrying ...");
+        }
+
         var ip = InetAddress.getByName(args[0]);
         int port = Integer.parseInt(args[1]);
         DatagramPacket dpacket;
