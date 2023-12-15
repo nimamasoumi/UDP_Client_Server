@@ -4,6 +4,8 @@ Clients and a server may communicate using the Transmission Control Protocol (TC
 ![alt-text](https://github.com/nimamasoumi/UDP_Client_Server/blob/main/udp.jpeg?raw=true)
 
 Herein, the client and server Java applications connect and communicate using UDP. 
+There are client-server application to connect to a KUKA robot as well. 
+The utility packages available in this repository provide powerful classes to build complex communication between the client and sever.
 ## Usage and run the program ##
 
 - Step 1:
